@@ -1,4 +1,4 @@
-#     Routerious.coffee 0.1.0
+#     Routerious.coffee 0.1.1
 
 #     (c) 2010-2012 Leandro Ostera.
 #     Routerious may be freely distributed under the MIT license.
@@ -16,6 +16,8 @@
 #
 #  It also includes functionality for Router-wide model handling (such as a
 #  global or router-wide user model or session model)
+#
+#  Ro...ro...routerious
 ### 
 
 class Routerious extends Backbone.Router
@@ -32,16 +34,18 @@ class Routerious extends Backbone.Router
   ###
 
   # __prepareView( view )
-  ## Takes care of all the living views, leaving no zombie views alive.
-  __prepareView: (view, options=undefined, killMe=yes) =>
-    @__killViews()
-    view = require('../views/'+view).init(options)
-    view.killMe = killMe
+  __prepareView: (viewName, options={kill_all: yes}, killMe=yes) =>
+    # clean unused views
+    if options?.kill_all then @__killViews()
+    # prepare clean view object
+    view = {}
+    _.extend view, require('../views/'+viewName).init(options), {killMe: killMe}
     @views.push view
     _.last @views
 
   # __killViews
   ## Takes care of removing all the views and unbinding all events
+  ## when rerouting to a new path
   __killViews: (options={preserve_dom: true}) =>
     _.forEach @views, (view) =>
       if view.killMe is yes
